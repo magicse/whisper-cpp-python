@@ -1,3 +1,5 @@
+import os
+
 from skbuild import setup
 import skbuild.constants
 import shutil
@@ -5,6 +7,9 @@ import shutil
 from pathlib import Path
 
 from pycparser import c_ast, parse_file
+
+os.environ["CC"] = "gcc"  # or the path to your MinGW gcc
+os.environ["CXX"] = "g++"  # or the path to your MinGW g++
 
 FILE = '''# auto-generated file
 import sys
@@ -90,7 +95,19 @@ class WhisperCppFileGen():
         return typ
 
     def __init__(self, filename, fake_libc = 'vendor/pycparser/utils/fake_libc_include'):
-        self.ast = parse_file(filename, use_cpp=True, cpp_args=['-E', f'-I{fake_libc}'], cpp_path='gcc')
+        self.ast = parse_file(
+                filename,
+                use_cpp=True,
+                cpp_args=[
+                    '-E',
+                    #'-D__gnuc_va_list=struct {}',
+                    #'-D__USE_MINGW_ANSI_STDINT',
+                    f'-I{fake_libc}',
+                    '-Ivendor/whisper.cpp/include',
+                    '-Ivendor/whisper.cpp/ggml/include'
+                ],
+            cpp_path='gcc'
+        )
         self.blocks = []
         self._output = None
         self._process()
@@ -235,17 +252,22 @@ if __name__ == '__main__':
         python_requires=">=3.9",
         classifiers=[
             "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
         ],
         include_package_data=True,
         cmake_process_manifest_hook=lambda x: list(filter(lambda y: not y.endswith('.h'), x)),
+        cmake_args=[
+        "-G", "MinGW Makefiles",  # Use MinGW generator
+        ],
     )
 
     # generate whisper_cpp.py with whisper.h header file
     dest_dir = Path("whisper_cpp_python")
     c_header_file = "vendor/whisper.cpp/whisper.h"
+    #c_header_file = "vendor/whisper.cpp/include/whisper.h"
     file_gen = WhisperCppFileGen(c_header_file)
     file_gen.output(dest_dir / "whisper_cpp.py")
 
