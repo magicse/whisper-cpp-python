@@ -11,8 +11,12 @@ This module automatically parses the C++ header file of the project during build
 
 To install the module, you can use pip:
 
-```bash
-pip install whisper-cpp-python
+```cmd
+git clone https://github.com/magicse/whisper-cpp-python
+cd whisper-cpp-python
+git submodule update --init --recursive
+python setup.py build
+python setup.py install
 ```
 
 ## Usage
