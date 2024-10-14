@@ -10,7 +10,7 @@ repository = "https://github.com/carloscdias/whisper-cpp-python"
 packages = [{include = "whisper_cpp_python"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 librosa = "^0.10.0.post2"
 
 [build-system]
