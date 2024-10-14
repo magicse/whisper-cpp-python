@@ -1,4 +1,4 @@
-# whisper-cpp-python
+# whisper-cpp-python for mingw64 under windows
 
 ![GitHub Workflow Status (with branch)](https://img.shields.io/github/actions/workflow/status/carloscdias/whisper-cpp-python/build_and_publish.yml)
 ![GitHub](https://img.shields.io/github/license/carloscdias/whisper-cpp-python)
