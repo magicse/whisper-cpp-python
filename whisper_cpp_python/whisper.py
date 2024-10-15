@@ -12,37 +12,33 @@ class Whisper():
     def __init__(self, model_path, strategy = 0, n_threads = 1):
         self.context = whisper_cpp.whisper_init_from_file(model_path.encode('utf-8'))
         self.params  = whisper_cpp.whisper_full_default_params(strategy)
-        self.params.n_threads = n_threads
-        self.params.print_special = False
-        self.params.print_progress = False
-        self.params.print_realtime = False
-        self.params.print_timestamps = False
+        #self.params.n_threads = n_threads
+        #self.params.print_special = False
+        #self.params.print_progress = False
+        self.params.print_realtime = True
+        #self.params.print_timestamps = False
 
     def transcribe(self, file, prompt = None, response_format = 'json', temperature = 0.8, language = 'en') -> Any:
         data, sr = librosa.load(file, sr=Whisper.WHISPER_SR)
-        data_pcm = np.int16(data * 32767)  # Scale to 16-bit range
+        print(data.dtype)  # Should be float32
         self.params.language = language.encode('utf-8')
         if prompt:
             self.params.initial_prompt = prompt.encode('utf-8')
         self.params.temperature = temperature
-        #result = self._full(data)
-        result = self._full(data_pcm)
+        result = self._full(data)
         return self._parse_format(result, response_format)
 
     def translate(self, file, prompt = None, response_format = 'json', temperature = 0.8) -> Any:
         data, sr = librosa.load(file, sr=Whisper.WHISPER_SR)
-        data_pcm = np.int16(data * 32767)  # Scale to 16-bit range
         self.params.translate = True
         self.params.initial_prompt = prompt.encode('utf-8')
         self.params.temperature = temperature
-        #result = self._full(data)
-        result = self._full(data_pcm)
+        result = self._full(data)
         return self._parse_format(result, response_format)
 
     def _full(self, data) -> WhisperResult:
         # run the inference
-        #r = whisper_cpp.whisper_full(ctypes.c_void_p(self.context), self.params, data.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), len(data))
-        r = whisper_cpp.whisper_full(ctypes.c_void_p(self.context), self.params, data.ctypes.data_as(ctypes.POINTER(ctypes.c_short)), len(data))
+        r = whisper_cpp.whisper_full(ctypes.c_void_p(self.context), self.params, data.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), len(data))
         if r != 0:
             raise "Error: {}".format(result)
 

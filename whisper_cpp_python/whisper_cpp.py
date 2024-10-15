@@ -546,6 +546,13 @@ def whisper_print_system_info() -> ctypes.c_char_p:
 _lib.whisper_print_system_info.argtypes = []
 _lib.whisper_print_system_info.restype = ctypes.c_char_p
 
+class whisper_grammar_element(ctypes.Structure):
+    _fields_ = [
+        ("rule", ctypes.c_char * 256),  # Example field, adjust as needed
+        ("weight", ctypes.c_float),      # Example field, adjust as needed
+    ]
+
+ggml_abort_callback = ctypes.CFUNCTYPE(ctypes.c_void_p)  # Adjust the return type and parameters as needed
 
 whisper_new_segment_callback = ctypes.CFUNCTYPE(None, whisper_context_p, whisper_state_p, ctypes.c_int, ctypes.c_void_p)
 
@@ -575,6 +582,7 @@ class whisper_full_params(ctypes.Structure):
         ("duration_ms", ctypes.c_int),
         ("translate", ctypes.c_bool),
         ("no_context", ctypes.c_bool),
+        ("no_timestamps", ctypes.c_bool),
         ("single_segment", ctypes.c_bool),
         ("print_special", ctypes.c_bool),
         ("print_progress", ctypes.c_bool),
@@ -586,9 +594,11 @@ class whisper_full_params(ctypes.Structure):
         ("max_len", ctypes.c_int),
         ("split_on_word", ctypes.c_bool),
         ("max_tokens", ctypes.c_int),
-        ("speed_up", ctypes.c_bool),
+        ("debug_mode", ctypes.c_bool), 
         ("audio_ctx", ctypes.c_int),
-        ("initial_prompt", ctypes.c_char_p),
+        ("tdrz_enable", ctypes.c_bool), 
+        ("suppress_regex", ctypes.c_char_p), 
+        ("initial_prompt", ctypes.c_char_p), 
         ("prompt_tokens", ctypes.POINTER(whisper_token)),
         ("prompt_n_tokens", ctypes.c_int),
         ("language", ctypes.c_char_p),
@@ -610,8 +620,16 @@ class whisper_full_params(ctypes.Structure):
         ("progress_callback_user_data", ctypes.c_void_p),
         ("encoder_begin_callback", whisper_encoder_begin_callback),
         ("encoder_begin_callback_user_data", ctypes.c_void_p),
+        ("abort_callback", ggml_abort_callback),
+        ("abort_callback_user_data", ctypes.c_void_p),
         ("logits_filter_callback", whisper_logits_filter_callback),
         ("logits_filter_callback_user_data", ctypes.c_void_p),
+        
+        # Add the grammar fields here
+        ("grammar_rules", ctypes.POINTER(ctypes.POINTER(whisper_grammar_element))),  # Adjust as needed
+        ("n_grammar_rules", ctypes.c_size_t),
+        ("i_start_rule", ctypes.c_size_t),
+        ("grammar_penalty", ctypes.c_float),
     ]
 
 def whisper_full_default_params(strategy: ctypes.c_int) -> whisper_full_params:
