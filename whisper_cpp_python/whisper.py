@@ -1,8 +1,9 @@
-from . import whisper_cpp
-from .whisper_types import WhisperResult, WhisperSegment, WhisperToken
+import whisper_cpp
+from whisper_types import WhisperResult, WhisperSegment, WhisperToken
 from typing import List, Literal, Any
 import ctypes
 import librosa
+import numpy as np
 
 
 class Whisper():
@@ -19,24 +20,29 @@ class Whisper():
 
     def transcribe(self, file, prompt = None, response_format = 'json', temperature = 0.8, language = 'en') -> Any:
         data, sr = librosa.load(file, sr=Whisper.WHISPER_SR)
+        data_pcm = np.int16(data * 32767)  # Scale to 16-bit range
         self.params.language = language.encode('utf-8')
         if prompt:
             self.params.initial_prompt = prompt.encode('utf-8')
         self.params.temperature = temperature
-        result = self._full(data)
+        #result = self._full(data)
+        result = self._full(data_pcm)
         return self._parse_format(result, response_format)
 
     def translate(self, file, prompt = None, response_format = 'json', temperature = 0.8) -> Any:
         data, sr = librosa.load(file, sr=Whisper.WHISPER_SR)
+        data_pcm = np.int16(data * 32767)  # Scale to 16-bit range
         self.params.translate = True
         self.params.initial_prompt = prompt.encode('utf-8')
         self.params.temperature = temperature
-        result = self._full(data)
+        #result = self._full(data)
+        result = self._full(data_pcm)
         return self._parse_format(result, response_format)
 
     def _full(self, data) -> WhisperResult:
         # run the inference
-        r = whisper_cpp.whisper_full(ctypes.c_void_p(self.context), self.params, data.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), len(data))
+        #r = whisper_cpp.whisper_full(ctypes.c_void_p(self.context), self.params, data.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), len(data))
+        r = whisper_cpp.whisper_full(ctypes.c_void_p(self.context), self.params, data.ctypes.data_as(ctypes.POINTER(ctypes.c_short)), len(data))
         if r != 0:
             raise "Error: {}".format(result)
 
