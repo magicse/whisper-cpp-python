@@ -127,13 +127,15 @@ class Whisper():
         whisper_cpp.whisper_free(ctypes.c_void_p(self.context))
 
     @staticmethod
-    def format_time(t: int):
-        msec = t * 10
-        hr = msec / (1000 * 60 * 60)
-        msec = msec - hr * (1000 * 60 * 60)
-        minu = msec / (1000 * 60)
-        msec = msec - minu * (1000 * 60)
-        sec = msec / 1000
-        msec = msec - sec * 1000
-        return f'{int(hr):02}:{int(minu):02}:{int(sec):02}.{int(msec):03}'
+    def format_time(t: float):
+        #msec = t * 10
+        msec = round(t * 1000.0)
+        hours = msec // (1000 * 60 * 60)
+        msec = msec - hours * (1000 * 60 * 60)
+        minutes = msec // (1000 * 60)
+        msec = msec - minutes * (1000 * 60)
+        seconds = msec // 1000
+        msec = msec - seconds * 1000
+        #print(f'{hours:}:{minutes:02d}:{seconds:02d}.{msec:03d}')
+        return f'{int(hours):02}:{int(minutes):02}:{int(seconds):02}.{int(msec):03}'
 
